@@ -135,8 +135,7 @@ React Dashboard
 
 ### Prerequisites
 
-- Java 8+
-- Hadoop 3.x
+- Docker & Docker Compose
 - Apache Spark 3.x
 - Python 3.8+
 - Node.js 18+
@@ -148,24 +147,30 @@ React Dashboard
 git clone https://github.com/your-username/sentispark.git
 cd sentispark
 
-# 2. Install Python dependencies
+# 2. Start the Hadoop cluster with Docker
+git clone https://github.com/big-data-europe/docker-hadoop.git
+cd docker-hadoop
+docker-compose up -d
+cd ..
+
+# 3. Install Python dependencies
 pip install -r requirements.txt
 
-# 3. Download the Yelp dataset
+# 4. Download the Yelp dataset
 # Visit https://www.yelp.com/dataset and place the file at:
 # data/yelp_academic_dataset_review.json
 
-# 4. Load data into HDFS
+# 5. Load data into HDFS
 hdfs dfs -mkdir -p /data/yelp/raw
 hdfs dfs -put data/yelp_academic_dataset_review.json /data/yelp/raw/
 
-# 5. Run the Spark pipeline
+# 6. Run the Spark pipeline
 spark-submit --master yarn src/pipeline/train.py
 
-# 6. Sync results to Supabase
+# 7. Sync results to Supabase
 python src/sync/upload_results.py
 
-# 7. Start the dashboard
+# 8. Start the dashboard
 cd frontend
 npm install
 npm run dev
@@ -210,11 +215,13 @@ sentispark/
 ## Tech Stack
 
 ![Hadoop](https://img.shields.io/badge/Hadoop-3.x-yellow)
+![Docker](https://img.shields.io/badge/Docker-Compose-blue)
 ![Spark](https://img.shields.io/badge/Apache%20Spark-3.x-orange)
 ![PySpark](https://img.shields.io/badge/PySpark-MLlib-red)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)
 ![React](https://img.shields.io/badge/React-Vite-blue)
 
+- **Cluster**: Docker + Docker Compose (big-data-europe/docker-hadoop)
 - **Storage**: Hadoop HDFS
 - **Processing**: Apache Spark, Spark SQL
 - **ML**: Spark MLlib (Logistic Regression, TF-IDF)
@@ -233,4 +240,4 @@ Software Development — Universidad Tecmilenio
 
 ## License
 
-This project is for academic purposes. The Yelp dataset is subject to [Yelp's Dataset Terms of Use](https://business.yelp.com/data/resources/open-dataset/).
+This project is for academic purposes. The Yelp dataset is subject to [Yelp's Dataset Terms of Use](https://www.yelp.com/dataset/terms).
