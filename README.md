@@ -1,4 +1,4 @@
-# SentiSpark — Restaurant Review Sentiment Analysis at Scale
+# restaurant-review-sentiment — Restaurant Review Sentiment Analysis at Scale
 
 A Big Data pipeline that classifies sentiment (positive / neutral / negative) from millions of Yelp restaurant reviews using **Apache Spark MLlib**, **Hadoop HDFS**, and a **React dashboard** powered by **Supabase**.
 
@@ -144,8 +144,8 @@ React Dashboard
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/sentispark.git
-cd sentispark
+git clone https://github.com/amirmx2905/restaurant-review-sentiment.git
+cd restaurant-review-sentiment
 
 # 2. Start the Hadoop cluster with Docker
 git clone https://github.com/big-data-europe/docker-hadoop.git
