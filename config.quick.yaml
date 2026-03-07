@@ -1,0 +1,30 @@
+spark:
+  app_name: "restaurant-review-sentiment-quick"
+  master: "local[*]"
+  shuffle_partitions: 64
+
+paths:
+  input_json: "yepl_dataset/review_sample_50000.json"
+  raw_parquet: "artifacts_quick/raw_reviews"
+  curated_parquet: "artifacts_quick/curated_reviews"
+  model_dir: "artifacts_quick/model"
+  metrics_json: "artifacts_quick/model_metrics"
+  predictions_dir: "artifacts_quick/predictions"
+  daily_stats_dir: "artifacts_quick/daily_stats"
+  class_distribution_dir: "artifacts_quick/class_distribution"
+
+preprocessing:
+  min_words: 10
+  vocab_size: 5000
+  min_df: 1
+
+model:
+  reg_params: [0.1]
+  max_iter: 50
+  cv_folds: 2
+  cv_parallelism: 1
+
+runtime:
+  write_mode: "overwrite"
+  seed: 42
+  sample_fraction: 1.0

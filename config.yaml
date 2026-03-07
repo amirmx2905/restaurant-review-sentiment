@@ -1,0 +1,35 @@
+spark:
+  app_name: "restaurant-review-sentiment"
+  master: "local[2]"
+  shuffle_partitions: 96
+  default_parallelism: 96
+  driver_memory: "6g"
+  executor_memory: "4g"
+  driver_max_result_size: "1g"
+  adaptive_enabled: "true"
+
+paths:
+  input_json: "yepl_dataset/yelp_academic_dataset_review.json"
+  raw_parquet: "artifacts/raw_reviews"
+  curated_parquet: "artifacts/curated_reviews"
+  model_dir: "artifacts/model"
+  metrics_json: "artifacts/model_metrics"
+  predictions_dir: "artifacts/predictions"
+  daily_stats_dir: "artifacts/daily_stats"
+  class_distribution_dir: "artifacts/class_distribution"
+
+preprocessing:
+  min_words: 10
+  vocab_size: 10000
+  min_df: 5
+
+model:
+  reg_params: [0.1]
+  max_iter: 80
+  cv_folds: 2
+  cv_parallelism: 1
+
+runtime:
+  write_mode: "overwrite"
+  seed: 42
+  sample_fraction: 0.20

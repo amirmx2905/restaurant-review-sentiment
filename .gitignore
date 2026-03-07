@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+env/
+.venv/
+.venv311/
+
+# Local editor/workspace
+.vscode/
+.idea/
+
+# Spark/Hadoop local runtime artifacts
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Project-generated artifacts
+artifacts/
+artifacts_quick/
+
+# Local datasets (do not commit raw Yelp dumps)
+yepl_dataset/
+data/
+
+# Logs and temp files
+*.log
+*.tmp
