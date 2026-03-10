@@ -71,10 +71,17 @@ def clean_and_label(df: "DataFrame", min_words: int) -> "DataFrame":
 
 def build_feature_stages(vocab_size: int, min_df: int) -> List[object]:
     """Build Spark ML feature stages for tokenization and TF-IDF."""
-    from pyspark.ml.feature import CountVectorizer, IDF, RegexTokenizer, StopWordsRemover
+    from pyspark.ml.feature import (
+        CountVectorizer,
+        IDF,
+        RegexTokenizer,
+        StopWordsRemover,
+    )
 
     tokenizer = RegexTokenizer(inputCol="text_clean", outputCol="tokens", pattern=r"\W+")
     stopword_remover = StopWordsRemover(inputCol="tokens", outputCol="filtered_tokens")
+    stopword_remover.setLocale("en_US")
+
     vectorizer = CountVectorizer(
         inputCol="filtered_tokens",
         outputCol="tf",
@@ -83,3 +90,72 @@ def build_feature_stages(vocab_size: int, min_df: int) -> List[object]:
     )
     idf = IDF(inputCol="tf", outputCol="features")
     return [tokenizer, stopword_remover, vectorizer, idf]
+
+
+def build_feature_stages_with_options(preprocessing_cfg: dict) -> List[object]:
+    """Build feature stages with optional bigram features.
+
+    When bigrams are enabled, unigram and bigram TF-IDF vectors are concatenated
+    into a single `features` vector used by the classifier.
+    """
+    from pyspark.ml.feature import (
+        CountVectorizer,
+        IDF,
+        NGram,
+        RegexTokenizer,
+        StopWordsRemover,
+        VectorAssembler,
+    )
+
+    vocab_size = int(preprocessing_cfg["vocab_size"])
+    min_df = int(preprocessing_cfg["min_df"])
+    use_bigrams = bool(preprocessing_cfg.get("use_bigrams", False))
+
+    tokenizer = RegexTokenizer(inputCol="text_clean", outputCol="tokens", pattern=r"\W+")
+    stopword_remover = StopWordsRemover(inputCol="tokens", outputCol="filtered_tokens")
+    stopword_remover.setLocale("en_US")
+
+    if not use_bigrams:
+        unigram_vectorizer = CountVectorizer(
+            inputCol="filtered_tokens",
+            outputCol="tf",
+            vocabSize=vocab_size,
+            minDF=min_df,
+        )
+        unigram_idf = IDF(inputCol="tf", outputCol="features")
+        return [tokenizer, stopword_remover, unigram_vectorizer, unigram_idf]
+
+    unigram_vectorizer = CountVectorizer(
+        inputCol="filtered_tokens",
+        outputCol="tf_unigram",
+        vocabSize=vocab_size,
+        minDF=min_df,
+    )
+    unigram_idf = IDF(inputCol="tf_unigram", outputCol="features_unigram")
+
+    bigram_vocab_size = int(preprocessing_cfg.get("bigram_vocab_size", max(1000, vocab_size // 2)))
+    bigram_min_df = int(preprocessing_cfg.get("bigram_min_df", min_df))
+
+    bigram_stage = NGram(n=2, inputCol="filtered_tokens", outputCol="bigrams")
+    bigram_vectorizer = CountVectorizer(
+        inputCol="bigrams",
+        outputCol="tf_bigram",
+        vocabSize=bigram_vocab_size,
+        minDF=bigram_min_df,
+    )
+    bigram_idf = IDF(inputCol="tf_bigram", outputCol="features_bigram")
+    assembler = VectorAssembler(
+        inputCols=["features_unigram", "features_bigram"],
+        outputCol="features",
+    )
+
+    return [
+        tokenizer,
+        stopword_remover,
+        unigram_vectorizer,
+        unigram_idf,
+        bigram_stage,
+        bigram_vectorizer,
+        bigram_idf,
+        assembler,
+    ]

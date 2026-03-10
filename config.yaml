@@ -21,15 +21,17 @@ paths:
 preprocessing:
   min_words: 10
   vocab_size: 10000
-  min_df: 5
+  min_df: 2
+  use_bigrams: true
+  bigram_vocab_size: 4000
+  bigram_min_df: 3
 
 model:
-  reg_params: [0.1]
-  max_iter: 80
-  cv_folds: 2
-  cv_parallelism: 1
+  reg_params: [0.01, 0.03, 0.1]
+  elastic_net_params: [0.0, 0.3]
+  max_iter: 100
 
 runtime:
   write_mode: "overwrite"
   seed: 42
-  sample_fraction: 0.20
+  sample_fraction: 0.30

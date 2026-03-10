@@ -127,7 +127,7 @@ React Dashboard
 - Regularization: L2 (`regParam`: 0.01, 0.1, 1.0)
 - Optimizer: L-BFGS
 - Max iterations: 100
-- Strategy: 3-fold cross-validation + class weighting
+- Strategy: validation holdout tuning on macro-F1 + class weighting
 
 ### Data Split
 
@@ -178,11 +178,15 @@ docker exec -it <namenode-container> hdfs dfs -mkdir -p /data/yelp/raw
 docker exec -it <namenode-container> hdfs dfs -put -f /path/in/container/yelp_academic_dataset_review.json /data/yelp/raw/
 
 # 6A. Run Spark pipeline in local mode (MVP / single machine)
-python -m src.pipeline.train --master local[*]
+python -m src.data.ingest --config config.quick.yaml
+python -m src.jobs.train --config config.quick.yaml
+python -m src.jobs.score --config config.quick.yaml
 
 # 6B. Run Spark pipeline on YARN (distributed)
 # Requires Spark to be installed and configured with the same Hadoop/YARN cluster
-spark-submit --master yarn src/pipeline/train.py
+spark-submit --master yarn src/data/ingest.py --config config.yaml
+spark-submit --master yarn src/jobs/train.py --config config.yaml
+spark-submit --master yarn src/jobs/score.py --config config.yaml
 
 # 7. Sync results to Supabase
 python src/sync/upload_results.py
@@ -203,19 +207,19 @@ Run this checklist first to ensure the core path is complete:
 
 ```bash
 # 0. Optional: create Python 3.11 virtual environment
-/opt/homebrew/bin/python3.11 -m venv .venv311
-.venv311/bin/python -m pip install -r requirements.txt
+/opt/homebrew/bin/python3.11 -m venv env
+env/bin/python -m pip install -r requirements.txt
 
 # 1. Quick smoke test (50k sample)
 head -n 50000 yepl_dataset/yelp_academic_dataset_review.json > yepl_dataset/review_sample_50000.json
-.venv311/bin/python -m src.data.ingest --config config.quick.yaml
-.venv311/bin/python -m src.jobs.train --config config.quick.yaml
-.venv311/bin/python -m src.jobs.score --config config.quick.yaml
+env/bin/python -m src.data.ingest --config config.quick.yaml
+env/bin/python -m src.jobs.train --config config.quick.yaml
+env/bin/python -m src.jobs.score --config config.quick.yaml
 
 # 2. Full local run (entire review file)
-.venv311/bin/python -m src.data.ingest --config config.yaml
-.venv311/bin/python -m src.jobs.train --config config.yaml
-.venv311/bin/python -m src.jobs.score --config config.yaml
+env/bin/python -m src.data.ingest --config config.yaml
+env/bin/python -m src.jobs.train --config config.yaml
+env/bin/python -m src.jobs.score --config config.yaml
 ```
 
 Expected outputs (local paths from config):
